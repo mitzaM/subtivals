@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui widgets websockets
 
 TARGET = subtivals
 TEMPLATE = app
@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     configeditor.cpp \
     player.cpp \
     styleadvanced.cpp \
-    shortcuteditor.cpp
+    shortcuteditor.cpp \
+    weblive.cpp
 
 HEADERS  += mainwindow.h \
     script.h \
@@ -31,7 +32,8 @@ HEADERS  += mainwindow.h \
     configeditor.h \
     player.h \
     styleadvanced.h \
-    shortcuteditor.h
+    shortcuteditor.h \
+    weblive.h
 
 FORMS    += mainwindow.ui \
     subtitlesform.ui \
