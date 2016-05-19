@@ -409,6 +409,7 @@ void MainWindow::openFile (const QString &p_fileName)
 
     // Update the table
     ui->tableWidget->setRowCount(count);
+    ui->tableWidget->scrollToTop();
     QListIterator<Subtitle *> i = m_script->subtitles();
     int row = 0;
     while (i.hasNext()) {
