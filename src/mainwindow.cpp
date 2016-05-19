@@ -33,6 +33,7 @@
 #include <QMimeData>
 #include <QStyledItemDelegate>
 #include <QStyle>
+#include <QDebug>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -591,8 +592,9 @@ void MainWindow::actionOpen()
         logFile->open(QIODevice::WriteOnly | QIODevice::Append);
         QTextStream ts(logFile);
         QDateTime current = QDateTime::currentDateTime();
-        QString txt = QString("[%1] Opened file: %2\r\n").arg(current.toString("yyyy-MM-dd hh:mm:ss"), fileName);
-        ts << txt;
+        QString sub_info = QString("[%1] Opened file: %2\r\n").arg(current.toString("yyyy-MM-dd hh:mm:ss"), fileName);
+        QString duration_info = QString("[%1] Total duration: %2\r\n").arg(current.toString("yyyy-MM-dd hh:mm:ss"), ts2tc(m_script->totalDuration(), "hh:mm:ss"));
+        ts << sub_info << duration_info;
         logFile->close();
     }
 }
@@ -879,6 +881,12 @@ void MainWindow::subtitleChanged(QList<Subtitle*> p_currentSubtitles)
         QWidget* withFocus = qApp->focusWidget();
         ui->tableWidget->selectRow(subtitleRow);
         if (withFocus) withFocus->setFocus();  // restore
+
+        logFile->open(QIODevice::WriteOnly | QIODevice::Append);
+        QTextStream ts(logFile);
+        QString remaining_info = tr("[%1] Remaining: %2\r\n").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"), ts2tc(m_script->totalDuration() - msecsElapsed, "hh:mm:ss"));
+        ts << remaining_info;
+        logFile->close();
     }
     m_rowChanged = false;
 }
