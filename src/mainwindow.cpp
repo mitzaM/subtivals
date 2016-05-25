@@ -122,7 +122,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_filewatcher(new QFileSystemWatcher),
     m_scriptProperties(new QLabel(this)),
     m_countDown(new QLabel(this)),
-    logFile(new QFile("log_file.json"))
+    logFile(new QFile(QDir::homePath() + "/subtivals_log.json" ))
 {
     ui->setupUi(this);
     ui->tableWidget->setItemDelegateForColumn(COLUMN_START, new SubtitleDurationDelegate());
