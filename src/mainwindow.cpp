@@ -34,9 +34,7 @@
 #include <QStyledItemDelegate>
 #include <QStyle>
 #include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QVariantHash>
+#include <QHash>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -122,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_filewatcher(new QFileSystemWatcher),
     m_scriptProperties(new QLabel(this)),
     m_countDown(new QLabel(this)),
-    logFile(new QFile(QDir::homePath() + "/subtivals_log.json" ))
+    logFile(new QFile(QDir::homePath() + "/subtivals_log.txt" ))
 {
     ui->setupUi(this);
     ui->tableWidget->setItemDelegateForColumn(COLUMN_START, new SubtitleDurationDelegate());
@@ -594,11 +592,11 @@ void MainWindow::actionOpen()
         m_lastFolder = QFileInfo(fileName).absoluteDir().absolutePath();
         openFile(fileName);
 
-        QVariantHash newLogs;
-        newLogs["last_updated"] = QDateTime::currentDateTime().toString();
+        QHash<QString, QString> newLogs;
         newLogs["subtitle"]=  fileName;
         newLogs["duration"] = ts2tc(m_script->totalDuration(), "hh:mm:ss");
         newLogs["remaining"] = ts2tc(m_script->totalDuration(), "hh:mm:ss");
+        newLogs["lastUpdated"] = QDateTime::currentDateTime().toString();
         writeLog(newLogs);
     }
 }
@@ -886,9 +884,9 @@ void MainWindow::subtitleChanged(QList<Subtitle*> p_currentSubtitles)
         ui->tableWidget->selectRow(subtitleRow);
         if (withFocus) withFocus->setFocus();  // restore
 
-        QVariantHash currentLog = readLog();
+        QHash<QString, QString> currentLog = readLog();
         currentLog["remaining"] = ts2tc(m_script->totalDuration() - msecsElapsed, "hh:mm:ss");
-        currentLog["last_updated"] = QDateTime::currentDateTime().toString();
+        currentLog["lastUpdated"] = QDateTime::currentDateTime().toString();
         writeLog(currentLog);
     }
     m_rowChanged = false;
@@ -1065,23 +1063,29 @@ void MainWindow::actionShowHelp()
     QDesktopServices::openUrl(QUrl("http://help.subtivals.org"));
 }
 
-QVariantHash MainWindow::readLog()
+QHash<QString, QString> MainWindow::readLog()
 {
-      QString val;
+      QHash<QString, QString> log;
       logFile->open(QIODevice::ReadOnly | QIODevice::Text);
-      val = logFile->readAll();
+      QTextStream input(logFile);
+      while (!input.atEnd())
+      {
+         QString line = input.readLine();
+         QStringList val = line.split(":");
+         log[val[0]] = val[1];
+      }
       logFile->close();
-      QJsonDocument json_log = QJsonDocument::fromJson(val.toUtf8());
-      QJsonObject logs = json_log.object();
-      QVariantHash log = logs.toVariantHash();
       return log;
 }
 
-void MainWindow::writeLog(QVariantHash &updatedLogs)
+void MainWindow::writeLog(QHash<QString, QString> &updatedLogs)
 {
-    logFile->open(QIODevice::WriteOnly);
-    QJsonObject newLog = QJsonObject::fromVariantHash(updatedLogs);
-    QJsonDocument doc(newLog);
-    logFile->write(doc.toJson());
+    logFile->open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream ts(logFile);
+    QHash<QString, QString>::const_iterator i = updatedLogs.constBegin();
+    while (i != updatedLogs.constEnd()) {
+        ts << i.key() << ":" << i.value() << endl;
+        ++i;
+    }
     logFile->close();
 }

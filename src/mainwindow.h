@@ -28,6 +28,7 @@
 #include <QFileSystemWatcher>
 #include <QLabel>
 #include <QFile>
+#include <QHash>
 
 #include "script.h"
 
@@ -107,8 +108,8 @@ protected:
     void highlightSubtitles(qlonglong elapsed);
     QString ts2tc(qint64 p_timestamp, QString format = "hh:mm:ss.zzz");
     void setState(State p_state);
-    QVariantHash readLog();
-    void writeLog(QVariantHash &updatedLogs);
+    QHash<QString, QString> readLog();
+    void writeLog(QHash<QString, QString> &updatedLogs);
 private:
     State m_state;
     Ui::MainWindow *ui;
