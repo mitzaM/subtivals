@@ -1071,7 +1071,7 @@ QHash<QString, QString> MainWindow::readLog()
       while (!input.atEnd())
       {
          QString line = input.readLine();
-         QStringList val = line.split(":");
+         QStringList val = line.split("->");
          log[val[0]] = val[1];
       }
       logFile->close();
@@ -1084,7 +1084,7 @@ void MainWindow::writeLog(QHash<QString, QString> &updatedLogs)
     QTextStream ts(logFile);
     QHash<QString, QString>::const_iterator i = updatedLogs.constBegin();
     while (i != updatedLogs.constEnd()) {
-        ts << i.key() << ":" << i.value() << endl;
+        ts << i.key() << "->" << i.value() << endl;
         ++i;
     }
     logFile->close();
